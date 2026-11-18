@@ -1,0 +1,3 @@
+# INVENTED identifier subset of fixture_names.txt: tokens that also occur as code identifiers.
+Golfwick
+Indiason

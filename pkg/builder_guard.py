@@ -50,7 +50,7 @@ import ledger
 import pii_gate
 import pii_scan
 
-TOOL_VERSION = "builder_guard.py 0.1.1"
+TOOL_VERSION = "builder_guard.py 0.2.0"
 
 Verdict = collections.namedtuple("Verdict", "key kinds blocking refused row")
 

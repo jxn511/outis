@@ -159,6 +159,53 @@ class FileScrub(Base):
         self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
 
 
+class ScrubRules020(Base):
+    """Scrub rules added in 0.2.0 so `outis.py clean` can clear every kind
+    the scanner detects."""
+
+    @oracle("metamorphic", "scanning without a matching scrub means a gate "
+            "that can never clear: key material (a whole PEM block, or a bare "
+            "armour line) and access tokens are now removed, and the scrubbed "
+            "text passes the scanner.")
+    def test_key_material_and_tokens_are_removed(self):
+        from _support import privkey_armour, gitlab_token
+        pem = (privkey_armour() + "\nb3BlbnNzaC1rZXktdjE\nAAAAABG5vbmU\n"
+               "-----END OPENSSH PRIVATE" + " KEY-----\n")
+        for text in ("before\n" + pem + "after\n", "x " + privkey_armour() + "\n",
+                     "GITLAB_TOKEN=" + gitlab_token() + "\n"):
+            with self.subTest(text=text[:20]):
+                self.assertTrue(pii_scan.scan_text(text))
+                out, removed = pii_scrub.scrub_text(text)
+                self.assertTrue(removed)
+                self.assertEqual(pii_scan.scan_text(out), [])
+        out, _ = pii_scrub.scrub_text("before\n" + pem + "after\n")
+        self.assertNotIn("b3BlbnNzaC1rZXktdjE", out, "the key body must go with the armour")
+        self.assertIn("before", out)
+        self.assertIn("after", out)
+
+    @oracle("spec", "a scrubbed credential keeps its quotes, so a scrubbed "
+            "script still parses (the reference dropped the opening quote).")
+    def test_a_scrubbed_credential_keeps_its_quotes(self):
+        import ast
+        src = assign("password", "Zq7xK2pwX9") + "\nprint(password)\n"
+        out, removed = pii_scrub.scrub_text(src)
+        self.assertIn("credential", [k for k, _ in removed])
+        ast.parse(out)
+        self.assertIn('"[credential removed]"', out)
+
+    @oracle("spec", "an HTML file keeps its markup when only an entity-encoded "
+            "'@' hid the address; a scrubbed JSON file keeps its trailing "
+            "newline.")
+    def test_html_markup_and_json_newline_survive(self):
+        p = self.write("t.html", "<p>From: A &lt;x&#64;%s&gt; &amp; co</p>\n" % site("inst"))
+        new, removed = pii_scrub.scrub_file_text(p, self.read(p))
+        self.assertTrue(removed)
+        self.assertIn("&lt;[address removed]&gt; &amp; co", new)
+        q = self.write("m.json", json.dumps({"m": addr()}) + "\n")
+        new, removed = pii_scrub.scrub_file_text(q, self.read(q))
+        self.assertTrue(removed and new.endswith("}\n"))
+
+
 class EnvelopeScrub(Base):
     """scrub_envelopes.py: a scrub at stage k must invalidate stage k+1."""
 

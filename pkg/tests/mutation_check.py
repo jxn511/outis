@@ -208,6 +208,34 @@ MUTANTS = [
      "test_no_report_skips",
      "'not checked' reported as a pass"),
 
+    ("outis-output-gate-skipped", "outis.py",
+     r'        bad = gate_output\(stage, inv_before\)\n', '        bad = []\n',
+     "test_an_output_finding_fails_the_gate_and_is_named",
+     "the clean delivers a tree its own scanner would fail"),
+
+    ("outis-input-written", "outis.py",
+     r'    with open\(dst, "wb"\) as fh:\n        fh\.write\(data\)',
+     '    with open(src, "wb") as fh:\n        fh.write(data)',
+     "test_the_input_is_byte_identical_after_the_run",
+     "the quarantine (IN_DIR) is overwritten by the scrub"),
+
+    ("outis-must-survive-eaten", "redact_names.py",
+     r'            if len\(tok\) <= 3 or k in NAME_PARTICLES or k in words:\n',
+     '            if False:\n',
+     "test_every_must_survive_item_is_intact",
+     "ambiguous tokens treated as names: a rule name and a compound eaten"),
+
+    ("outis-binary-altered", "outis.py",
+     r'        with open\(dst, "wb"\) as fh:\n            fh\.write\(raw\)',
+     '        with open(dst, "wb") as fh:\n            fh.write(raw.replace(b"\\x00", b" "))',
+     "test_binaries_are_byte_identical_and_listed",
+     "a binary rewritten on the way through"),
+
+    ("pem-body-left-behind", "pii_scrub.py",
+     r'    out = PEM_BLOCK\.sub\(pem, out\)\n', '',
+     "test_key_material_and_tokens_are_removed",
+     "a private key's armour removed and its body left in the output"),
+
     ("missing-target-passes", "pii_scan.py",
      r'    if not os\.path\.exists\(args\.target\):\n',
      '    if False:\n',

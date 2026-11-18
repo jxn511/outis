@@ -54,7 +54,7 @@ import pii_gate
 import pii_scan
 import pii_scrub
 
-TOOL_VERSION = "scrub_envelopes.py 0.1.1"
+TOOL_VERSION = "scrub_envelopes.py 0.2.0"
 
 # Node fields holding text a reader can see. `summary` is what gets embedded;
 # `title` is displayed with the hit, so an address there is equally reachable.

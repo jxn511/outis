@@ -1,0 +1,14 @@
+# INVENTED names for the pass-5 tests. No real person carries any of them.
+# Each whitespace-separated word of a line is one listed token.
+Alphonzo Bravoson
+Charlot Deltason
+Echoway Foxtrotson
+Golfwick
+Indiason
+Julietta Kiloson
+Mikel
+Q
+# P19/P22: AMBIGUOUS invented tokens (two-letter particle, two-letter word, three-letter word)
+De
+Re
+Max

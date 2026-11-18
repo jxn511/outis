@@ -24,10 +24,10 @@ set -u
 
 HERE=$(cd "$(dirname "$0")" && pwd)
 cd "$HERE" || exit 2
-VERSION=0.1.1
+VERSION=0.2.0
 NAME=outis-$VERSION
 ARCHIVE=$NAME.tar.gz
-RELEASE_DATE="2026-11-17 00:00:00 UTC"
+RELEASE_DATE="2026-11-18 00:00:00 UTC"
 export PYTHONDONTWRITEBYTECODE=1
 
 refuse() { echo "REFUSED: $*" >&2; exit 2; }

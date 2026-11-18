@@ -78,7 +78,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pii_scan
 
-TOOL_VERSION = "pii_gate.py 0.1.1"
+TOOL_VERSION = "pii_gate.py 0.2.0"
 
 # Published identity: counted and printed, never blocking. Deliberately short.
 # Anything absent from this set blocks, so a detector added later is blocking

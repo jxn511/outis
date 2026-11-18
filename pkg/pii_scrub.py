@@ -48,7 +48,7 @@ import ledger
 import pii_scan
 from pii_scan import secret_is_wrapped_plain_word
 
-TOOL_VERSION = "pii_scrub.py 0.1.1"
+TOOL_VERSION = "pii_scrub.py 0.2.0"
 
 ADDRESS = "[address removed]"
 
@@ -65,6 +65,14 @@ SECRET_VALUE = re.compile(
     r"(?i)(\b(?:api[_-]?key|secret|passwd|password|token)\b\s*[:=]\s*)"
     r"(['\"]?)([A-Za-z0-9._\-/+]{8,})")
 CREDENTIAL = "[credential removed]"
+KEY_REMOVED = "[private key removed]"
+# The entity spellings of "@" (decimal, hex, named) that hide an address from
+# a byte-level match.
+AT_ENTITY = re.compile(r"&#0*64;|&#[xX]0*40;|&commat;")
+PEM_BLOCK = re.compile(
+    r"-----BEGIN (?:RSA |OPENSSH |EC |DSA |PGP |ENCRYPTED )?PRIVATE KEY(?: BLOCK)?-----"
+    r".*?-----END (?:RSA |OPENSSH |EC |DSA |PGP |ENCRYPTED )?PRIVATE KEY(?: BLOCK)?-----",
+    re.S)
 # The local part of a shell prompt. Generic by construction, so the redacted
 # prompt still reads as a prompt and cannot itself be flagged.
 PROMPT_USER = "user"
@@ -185,8 +193,28 @@ def scrub_text(text, keep_orcid=False):
         if secret_is_wrapped_plain_word(m.group(0)):
             return m.group(0)
         removed.append(("credential", "<%d chars>" % len(m.group(3))))
-        return m.group(1) + CREDENTIAL
+        # The opening quote is KEPT (0.2.0): the reference dropped it and left
+        # the closing one, so `password = "x..."` became a syntax error in
+        # every scrubbed script. Key, quote and closing quote all survive.
+        return m.group(1) + m.group(2) + CREDENTIAL
 
+    # Key material and access tokens (added in 0.2.0). The scanner has always
+    # DETECTED both; without a scrub rule the gate over a scrubbed copy could
+    # never clear them -- "scanning without a matching scrub". A PEM private
+    # key is removed as a whole block (BEGIN through END), never line by line:
+    # a key body left behind is still the key.
+    def pem(m):
+        removed.append(("private_key", "<%d chars>" % len(m.group(0))))
+        return KEY_REMOVED
+
+    out = PEM_BLOCK.sub(pem, out)
+    out = pii_scan.PRIVKEY.sub(pem, out)          # an armour line with no END
+
+    def glpat(m):
+        removed.append(("gitlab_token", "<%d chars>" % len(m.group(0))))
+        return CREDENTIAL
+
+    out = pii_scan.GLPAT.sub(glpat, out)
     out = SECRET_VALUE.sub(cred, out)
     out = pii_scan.EMAIL.sub(addr, out)
     if not keep_orcid:
@@ -229,6 +257,16 @@ def scrub_file_text(path, text, keep_orcid=False):
     import html as _html
     ext = os.path.splitext(path)[1].lower()
     if ext in pii_scan.HTML_EXT:
+        # 0.2.0: decode only the entity spellings of "@" first, so the markup
+        # (&lt;, &amp;, ...) survives as markup. That is accepted only if the
+        # result, read as a reader sees it (fully unescaped, the scanner's own
+        # view), has nothing left to remove; otherwise the reference behaviour
+        # applies -- decode everything, then scrub -- so the scrub still
+        # removes exactly what the scanner finds.
+        light = AT_ENTITY.sub("@", text)
+        new, removed = scrub_text(light, keep_orcid=keep_orcid)
+        if removed and not scrub_text(_html.unescape(new), keep_orcid=keep_orcid)[1]:
+            return new, removed
         decoded = _html.unescape(text)
         new, removed = scrub_text(decoded, keep_orcid=keep_orcid)
         return (new, removed) if removed else (text, [])
@@ -285,7 +323,10 @@ def _scrub_json_text(text, keep_orcid=False):
     scrubbed = walk(doc)
     if not removed:
         return text, []
-    return json.dumps(scrubbed, sort_keys=True, ensure_ascii=True), removed
+    # A trailing newline the file had is kept (0.2.0): the re-serialisation
+    # otherwise changes the last line of every scrubbed record.
+    return (json.dumps(scrubbed, sort_keys=True, ensure_ascii=True)
+            + ("\n" if text.endswith("\n") else "")), removed
 
 
 def main(argv=None):

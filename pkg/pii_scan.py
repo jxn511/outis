@@ -63,7 +63,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import text_decode
 
-TOOL_VERSION = "pii_scan.py 0.1.1"
+TOOL_VERSION = "pii_scan.py 0.2.0"
 
 # --- always personal, always stripped -------------------------------------
 EMAIL = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")

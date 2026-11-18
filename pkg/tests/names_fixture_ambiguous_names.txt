@@ -1,0 +1,5 @@
+# INVENTED ambiguous subset of fixture_names.txt (P19): dictionary words, tokens of three
+# letters or fewer, name particles. Replaced ONLY on attribution-idiom or name-only lines.
+De
+Re
+Max

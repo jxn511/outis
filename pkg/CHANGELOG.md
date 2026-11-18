@@ -1,5 +1,68 @@
 # Changelog -- Outis (pii_package)
 
+## 0.2.0 -- 2026-11-18
+
+Requirement (the principal, 2026-11-18, verbatim): "it is REQUIRED that Belle
+II collaborators beyond myself be able to d/l the package and input a defined
+corpus and, in turn, receive the same corpus stripped of PII".
+
+LIMIT, stated plainly: names are found only when they are on the roster given
+with --names. A name absent from the roster -- a visitor, an external referee,
+a student who left -- is NOT found by this release, and the model-based recall
+tier of PROCEDURE.md section 4 is not in this release. Binaries and PDFs are
+copied as they are; a PDF whose text carries a finding fails the output gate
+rather than being delivered.
+
+- `outis.py clean IN_DIR --out OUT_DIR [--rulings R] [--names N] [--jobs K]
+  [--apply]` (new): the same tree out, every file at the same path; the
+  scanner's blocking kinds scrubbed by pii_scrub's rules (ORCIDs kept); listed
+  names redacted by redact_names.py; binaries and PDFs copied byte-for-byte
+  and listed. IN_DIR is never written (its sha256 digests are checked after
+  the run); OUT_DIR may not lie inside IN_DIR or already exist. The run gates
+  its own output (no blocking kind in contents, paths or symlink targets; name
+  residue 0; file set equal; binaries identical; input unchanged); a failed
+  gate leaves the tree at OUT_DIR.FAILED_GATE, names the files and exits 1.
+  REPORT.md, ledger.jsonl, summary.json and the name tool's files go to
+  OUT_DIR.outis/, beside the output. Dry run by default (the whole pipeline on
+  a temporary copy; the record, including the name sample, is written; nothing
+  delivered); --apply delivers.
+- `redact_names.py` (new): the loop's redact_pass5.py 1.0 at its final form,
+  renamed; behaviour unchanged. Three-class token rule (--unambiguous-names /
+  --ambiguous-names / --identifier-names, or its own partition: dictionary
+  words, tokens of three letters or fewer and name particles AMBIGUOUS; a
+  token in code context IDENTIFIER), --citations-published, --force-lines /
+  --spare-lines, --sample with the outlier table and LEFT cells. Its 94 tests
+  carried (tests/test_redact_names.py, names_support.py, the four invented
+  fixture rosters) and tagged with the oracle convention; its mutation
+  harness carried as tests/names_mutants.py, writing its red-first evidence
+  OUTSIDE the package. The loop's red-first evidence directory is not
+  shipped.
+- `pii_scrub.py`: key material (a whole PEM block, or a bare armour line) and
+  access tokens are now scrubbed -- the scanner detected both and nothing
+  could remove them; a scrubbed credential keeps its quotes (the reference
+  dropped the opening one, breaking every scrubbed script); an HTML file
+  keeps its markup when only an entity-encoded "@" hid the address (the full
+  decode remains the fallback); a scrubbed JSON file keeps its trailing
+  newline.
+- `examples/make_example.py`: writes corpus/ (Markdown, LaTeX, text, decay and
+  particle tables, steering, C++ source, CSV, JSON, JSONL, an HTML thread
+  export, a key file, a binary), the synthetic roster names.txt and
+  planted.json; the README's executed block runs `outis.py clean` on it
+  (dry run with --sample, then --apply, then the PASS check).
+- README: "One command", "The roster" (what it is, the limit, how the sample
+  is reviewed before --apply).
+- Tests: 221 methods (110 in 0.1.1; +94 carried with redact_names.py, +14
+  outis clean, +3 pii_scrub rules). Census: 12 external, 26 human, 157 spec,
+  24 metamorphic, 2 structural, 0 implementation. The 94 carried tests are
+  tagged spec as a block, by their module's tagging loop; they have not been
+  ratified one by one. 220 run, 1 skipped (the ratchet template, by design).
+- Mutation check: 35 of 35 mutants killed over 220 tests (1 skipped in the
+  scratch tree); the five new mutants skip the output gate, alter a binary,
+  eat a must-survive item, leave a private key's body behind, and write the
+  input. The name tool's own harness (tests/names_mutants.py): 97 of 97
+  killed, and its P9 and P22 old-form checks red as expected.
+- Tool versions read 0.2.0.
+
 ## 0.1.1 -- 2026-11-17
 
 Reason: two rules of the reference instance's ingestion-to-embed pipeline were

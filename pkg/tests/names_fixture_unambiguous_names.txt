@@ -1,0 +1,6 @@
+# INVENTED unambiguous subset of fixture_names.txt (P19; P15 called it the gate list).
+Alphonzo Bravoson
+Charlot Deltason
+Echoway Foxtrotson
+Julietta Kiloson
+Mikel
