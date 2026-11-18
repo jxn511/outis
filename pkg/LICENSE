@@ -1,0 +1,20 @@
+LICENSE (the terms stated by the author on 2026-11-17 and confirmed by the author, with the two clarifications of 1(a) and 2(b), on 2026-11-17: "license as you recommend")
+
+Copyright (c) 2026 the author of the reference instance. All rights reserved except as granted below.
+
+1. GRANT. Permission is granted, free of charge, to (a) the collaboration for which this package was prepared and its member
+   institutes, and (b) any other NON-COMMERCIAL entity that supplies its own PII-gate database -- the local rulings file, the member
+   roster and any token list that the tools read at run time, none of which is shipped with this package -- to use, copy, modify and
+   run this package, in whole or in part, for the purpose of detecting, recording and removing personal data from corpora under that
+   entity's control, and to redistribute it within that entity under these same terms.
+
+2. CONDITIONS. (a) The package, or any part of it, is not used, sold, licensed or hosted for commercial purposes, and is not
+   incorporated into a commercial product or service. (b) No roster, rulings file, token list or recorded finding is added to a copy
+   that is redistributed; those inputs stay with the entity that owns them. (c) This notice and the CHANGELOG travel with every copy.
+   (d) Modified copies state that they are modified and by which entity, without naming any person.
+
+3. NO WARRANTY. The package is provided as is, without warranty of any kind, express or implied, including fitness for a particular
+   purpose. A filter of this kind has a known false-negative rate stated in PROCEDURE.md; the entity running it bears the duty of
+   care for the personal data it holds.
+
+4. OTHER USE. Any use not granted above requires the written permission of the copyright holder.

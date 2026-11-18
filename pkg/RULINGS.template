@@ -1,0 +1,25 @@
+# RULINGS -- this instance's local exemptions. Copy to a file named RULINGS
+# kept OUTSIDE any shared repository, and point the tools at it with
+# --rulings <path> or the PII_RULINGS environment variable.
+#
+# One ruling per line, five fields separated by '|':
+#
+#   <class>:<value> | EXEMPT or BLOCK | <reason> | <ruler role> | <YYYY-MM-DD>
+#
+# class    address  one exact address; never its domain
+#          domain   the domain and every subdomain; the tail is anchored
+#          literal  an exact text of at least 8 characters covering a finding
+# verdict  EXEMPT creates the exemption; BLOCK records a decision and exempts
+#          nothing (everything blocks by default)
+# reason   cite the external oracle where one exists
+# ruler    a ROLE (privacy owner, data subject), not a name
+# date     YYYY-MM-DD
+#
+# A malformed row refuses the whole run (exit 2) and names its line number.
+# Blank lines and lines starting with '#' are ignored. 7-bit ASCII only.
+#
+# Examples (reserved RFC 2606 names; they illustrate the form only):
+#
+# address:desk@service.example | EXEMPT | a published service desk, an office not a person | privacy owner | 2026-11-17
+# domain:agency.example | EXEMPT | eligibility for this domain is restricted by policy to public offices | privacy owner | 2026-11-17
+# literal:data-form-token | EXEMPT | a session-scoped form attribute, powerless without its session cookie | privacy owner | 2026-11-17
