@@ -79,6 +79,37 @@ class LedgerError(Exception):
     pass
 
 
+def row_record(key, row, dup=False):
+    """The ledger's ONE row form: the dict for_each writes per record, and
+    append_row writes for a caller that guards one record at a time."""
+    out = {"key": key, "status": row.status, "detail": row.detail,
+           "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+    if dup:
+        out["duplicate_key"] = True
+    if row.measures:
+        out["measures"] = {k: list(v) if isinstance(v, (tuple, list))
+                           else [v, v] for k, v in row.measures.items()}
+    return out
+
+
+def append_row(ledger_path, key, row):
+    """Append ONE row, in for_each's row form, to an existing or new ledger.
+
+    For a builder that meets its records one at a time and cannot hand them
+    to for_each as a batch. The same refusals apply: a non-Row raises, and a
+    drop must state its reason. Returns the record written.
+    """
+    if not isinstance(row, Row):
+        raise LedgerError("append_row needs a Row, got %r" % type(row))
+    if row.status == "dropped" and not row.detail:
+        raise LedgerError("record %r dropped with no stated reason" % (key,))
+    out = row_record(key, row)
+    os.makedirs(os.path.dirname(os.path.abspath(ledger_path)), exist_ok=True)
+    with open(ledger_path, "a", encoding="ascii", errors="replace") as fh:
+        fh.write(json.dumps(out, ensure_ascii=True, sort_keys=True) + "\n")
+    return out
+
+
 def for_each(records, handler, ledger_path=None, key_of=None,
              sources=None, stream=sys.stdout, allow_duplicates=False):
     """Apply handler to every record, writing exactly one ledger row for each.
@@ -150,13 +181,7 @@ def for_each(records, handler, ledger_path=None, key_of=None,
                     # A reasoned drop's gap is accounted movement. The
                     # same gap in any other status stays in the residual.
                     totals[m][2] += a - b
-            out = {"key": key, "status": row.status, "detail": row.detail,
-                   "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
-            if dup:
-                out["duplicate_key"] = True
-            if row.measures:
-                out["measures"] = {k: list(v) if isinstance(v, (tuple, list))
-                                   else [v, v] for k, v in row.measures.items()}
+            out = row_record(key, row, dup)
             rows.append(out)
             if fh:
                 fh.write(json.dumps(out, ensure_ascii=True, sort_keys=True) + "\n")

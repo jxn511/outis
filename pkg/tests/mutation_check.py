@@ -177,6 +177,37 @@ MUTANTS = [
      "test_a_dry_run_writes_nothing_and_apply_does",
      "a dry run that rewrites the corpus"),
 
+    ("builder-lets-the-refused-file-through", "builder_guard.py",
+     r'    refused = bool\(blocking\)\n', '    refused = False\n',
+     "test_markdown_with_an_address_is_refused_by_kind_never_value",
+     "the builder builds markdown with a blocking finding (the 488-document class)"),
+
+    ("builder-cli-exits-zero-on-refusal", "builder_guard.py",
+     r'    return 1 if refused else 0', '    return 0',
+     "test_the_ledger_conserves_records_and_the_cli_exits_1",
+     "a batch build reports success over refused files"),
+
+    ("builder-row-key-carries-the-text", "builder_guard.py",
+     r'k = key or "text:" \+ hashlib\.sha256\(text\.encode\("utf-8", "surrogateescape"\)\)\.hexdigest\(\)\[:16\]',
+     'k = key or "text:" + text',
+     "test_text_input_is_keyed_by_digest",
+     "the ledger row's key reproduces the markdown it refused, value included"),
+
+    ("ratchet-direction-inverted", "tests/test_ratchet_template.py",
+     r'    if blocking > baseline:\n', '    if blocking < baseline:\n',
+     "test_a_rise_fails",
+     "the baseline read as a bound in the wrong direction: a rise passes, a fall fails"),
+
+    ("ratchet-ignores-disagreement", "tests/test_ratchet_template.py",
+     r'    if disagreement != 0:\n', '    if False:\n',
+     "test_a_disagreement_fails",
+     "a broken propagation path rides a passing ratchet"),
+
+    ("ratchet-no-report-passes", "tests/test_ratchet_template.py",
+     r'            self\.skipTest\(', '            return (',
+     "test_no_report_skips",
+     "'not checked' reported as a pass"),
+
     ("missing-target-passes", "pii_scan.py",
      r'    if not os\.path\.exists\(args\.target\):\n',
      '    if False:\n',

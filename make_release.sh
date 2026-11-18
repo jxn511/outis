@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# make_release.sh -- build outis-0.1.0.tar.gz from pkg/, reproducibly.
+# make_release.sh -- build outis-$VERSION.tar.gz from pkg/, reproducibly.
 #
 #   REFERENCE_SCANNER=/path/to/reference/pii_scan.py ./make_release.sh
 #   REFERENCE_SCANNER=none ./make_release.sh      # deliberately skip that gate
@@ -24,7 +24,7 @@ set -u
 
 HERE=$(cd "$(dirname "$0")" && pwd)
 cd "$HERE" || exit 2
-VERSION=0.1.0
+VERSION=0.1.1
 NAME=outis-$VERSION
 ARCHIVE=$NAME.tar.gz
 RELEASE_DATE="2026-11-17 00:00:00 UTC"
@@ -44,7 +44,7 @@ if ! python3 pkg/tests/run_tests.py >"$LOG" 2>&1; then
     tail -20 "$LOG" >&2
     refuse "the suite failed"
 fi
-tail -1 "$LOG" | sed 's/^/        /'
+grep -E '^(OK|FAILED)' "$LOG" | sed 's/^/        /'
 grep '^Ran ' "$LOG" | sed 's/^/        /'
 
 echo "  [2/4] the package's own gate"

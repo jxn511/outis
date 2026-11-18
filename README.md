@@ -9,7 +9,7 @@ The package lives in `pkg/`. Start with `pkg/README.md` (install, prove, scan, r
 member roster are local inputs the package never ships; see `pkg/RULINGS.template`.
 
 `make_release.sh` builds the reproducible archive `outis-<version>.tar.gz` and refuses unless the suite and both gates pass; the
-current archive's digest is in `outis-0.1.0.tar.gz.sha256`.
+current archive's digest is in `outis-<version>.tar.gz.sha256`.
 
 License: `pkg/LICENSE` -- private to the collaboration and to any other non-commercial entity that supplies its own PII-gate database.
 

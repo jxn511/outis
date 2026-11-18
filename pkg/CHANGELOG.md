@@ -1,5 +1,39 @@
 # Changelog -- Outis (pii_package)
 
+## 0.1.1 -- 2026-11-17
+
+Reason: two rules of the reference instance's ingestion-to-embed pipeline were
+present in 0.1.0 only as PROCEDURE.md text, not as shipped code. Both now ship.
+
+- `builder_guard.py` (new): the builder-side refusal. Converter output is new
+  material; a builder makes one call, `guard_markdown(path_or_text, ledger,
+  rulings=None)`, before building from a markdown file. Any blocking kind
+  (the egress gate's partition: ORCID is recorded, everything else blocks)
+  refuses the file and appends a `pii_blocked: <kinds>` row -- kinds, never
+  values -- in ledger.for_each's row form; a passed file gets an `ok` row, so
+  files in = passed + refused. CLI `builder_guard.py FILE... --ledger L`
+  exits 1 on any refusal. An unreadable file is refused, not passed.
+- `ledger.py`: the row form is factored into `row_record` and a new
+  `append_row` writes one row for callers that meet records one at a time;
+  `for_each` writes the identical form.
+- `tests/test_ratchet_template.py` (new): the egress ratchet as an adoptable
+  test. It reads the JSON report of `pii_gate.py --egress --report` and a
+  committed baseline file (`reachable_blocking=<count>`), fails on a rise or a
+  non-zero disagreement, passes on a fall or standstill, and SKIPS -- never
+  passes -- when no report exists. README.md, "The egress ratchet", says how
+  an instance adopts it. In this package it is the suite's one skip.
+- README: step 3 gains the builder hook; the executed command block gains
+  the guard before (exit 1) and after (exit 0) the scrub.
+- Tests: 110 methods (95 in 0.1.0; +7 builder guard, +7 ratchet logic, +1
+  ratchet template). Census: 12 external, 26 human, 50 spec, 20 metamorphic,
+  2 structural, 0 implementation. 109 run, 1 skipped (the template, by
+  design).
+- Mutation check: 30 of 30 mutants killed over 109 tests (1 skipped in the
+  scratch tree); the six new mutants let a refused file through, exit 0 on
+  refusal, key a refused text by its content, invert the ratchet's
+  direction, ignore the disagreement, and pass with no report.
+- Tool versions read 0.1.1.
+
 ## 0.1.0 -- 2026-11-17
 
 First packaged release, extracted from the PII tooling of one private corpus
@@ -7,7 +41,6 @@ instance (the "reference instance"). The reference instance keeps its own
 copies unchanged; this package is a separate, self-contained copy.
 
 license: LICENSE: private to the collaboration and to any other non-commercial entity that supplies its own PII-gate database; the author's terms of 2026-11-17, confirmed with the two clarifications (the member institutes; within-entity redistribution) the same day.
-so none is copied and none is invented; README.md carries a placeholder line.
 
 ### Contents
 

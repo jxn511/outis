@@ -48,7 +48,7 @@ import ledger
 import pii_scan
 from pii_scan import secret_is_wrapped_plain_word
 
-TOOL_VERSION = "pii_scrub.py 0.1.0"
+TOOL_VERSION = "pii_scrub.py 0.1.1"
 
 ADDRESS = "[address removed]"
 
